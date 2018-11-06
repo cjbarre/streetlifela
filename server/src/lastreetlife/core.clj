@@ -47,8 +47,6 @@
 (defn execute-zone-query! [params [x y :as lat-lon]]
   (json/read-str (:body (http/get api-url {:query-params (merge params {:geometry (format "%s,%s" y x)})})) :key-fn keyword))
 
-(def execute-zone-query! (memoize execute-zone-query!))
-
 (defn get-zone [{:keys [latitude longitude] :as position}]
   (println position)
   (if (not= 0 (-> (execute-zone-query! red-zone-query [latitude longitude]) :features count))
@@ -60,6 +58,8 @@
                     count))
         {:zone :green}
         {:zone :yellow}))))
+
+(def get-zone (memoize get-zone))
 
 (a/go-loop [in-msg (a/<! ch-chsk)]
   (when in-msg
