@@ -47,6 +47,8 @@
 (defn execute-zone-query! [params [x y :as lat-lon]]
   (json/read-str (:body (http/get api-url {:query-params (merge params {:geometry (format "%s,%s" y x)})})) :key-fn keyword))
 
+(def execute-zone-query! (memoize execute-zone-query!))
+
 (defn get-zone [{:keys [latitude longitude] :as position}]
   (println position)
   (if (not= 0 (-> (execute-zone-query! red-zone-query [latitude longitude]) :features count))
@@ -63,7 +65,7 @@
   (when in-msg
     (cond (= :app/user-position-update (:id in-msg)) (do
                                                        (println "request received")
-                                                       ((:?reply-fn in-msg) (get-zone (:?data in-msg)))
+                                                       (time ((:?reply-fn in-msg) (get-zone (:?data in-msg))))
                                                        (println "request answered")))
     (recur (a/<! ch-chsk))))
 
