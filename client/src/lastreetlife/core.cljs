@@ -2,7 +2,8 @@
   (:require-macros [cljs.core.async.macros :as asyncm :refer (go go-loop)])
   (:require [rum.core :as rum]
             [cljs.core.async :as async :refer (<! >! put! chan)]
-            [taoensso.sente :as sente :refer (cb-success?)]))
+            [taoensso.sente :as sente :refer (cb-success?)]
+            [cljsjs.leaflet]))
 
 
 
@@ -20,17 +21,31 @@
                   :yellow "#FFFF00"
                   :green "#00FF00"})
 
-(defonce app-state (atom {:color "#FFFFFF"}))
+(defonce app-state (atom {:color "#FFFFFF"
+                          :map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
 
-(rum/defc zone-indicator []
+(rum/defc zone-indicator < {:did-mount (fn [state]
+                                         (.watchPosition navigator.geolocation
+                                                         (fn [pos]
+                                                           (println "Sending request")
+                                                           (println (str pos.coords.latitude "," pos.coords.longitude))
+                                                           (chsk-send! [:app/user-position-update
+                                                                        {:latitude pos.coords.latitude
+                                                                         :longitude pos.coords.longitude}]
+                                                                       5000
+                                                                       (fn [reply]
+                                                                         (println "Request Answered")
+                                                                         (println reply)
+                                                                         (if (cb-success? reply)
+                                                                           (do (swap! app-state assoc :color (get zone-colors (:zone reply)))
+                                                                               (rum/mount (zone-indicator) (. js/document (getElementById "app"))))
+                                                                           (println reply)))))))}
+  []
   [:div {:style {:background-color (:color @app-state)
                  :width "100vw"
-                 :height "100vh"
+                 :height "5vh"
                  :margin "0"
                  :padding "0"}}])
-
-(rum/mount (zone-indicator)
-           (. js/document (getElementById "app")))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
@@ -38,23 +53,31 @@
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
 )
 
-(.watchPosition navigator.geolocation
-                (fn [pos]
-                  (println "Sending request")
-                  (println (str pos.coords.latitude "," pos.coords.longitude))
-                       (chsk-send! [:app/user-position-update
-                                    {:latitude pos.coords.latitude
-                                     :longitude pos.coords.longitude}]
-                                   5000
-                                   (fn [reply]
-                                     (println "Request Answered")
-                                     (println reply)
-                                     (if (cb-success? reply)
-                                       (do (swap! app-state assoc :color (get zone-colors (:zone reply)))
-                                           (rum/mount (zone-indicator) (. js/document (getElementById "app"))))
-                                       (println reply))))))
- 
-(println "This text is printed from src/lastreetlife/core.cljs. Go ahead and edit it and see reloading in action.")
-
 ;; define your app data so that it doesn't get over-written on reload 
+
+(rum/defc mapc < {:did-mount (fn [state]
+                               (let [mymap (.map js/L "map")]
+                                 (.addTo (.tileLayer js/L
+                                                     "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}"
+                                                     (clj->js
+                                                      {:maxZoom 18
+                                                       :id "mapbox.streets"
+                                                       :accessToken "pk.eyJ1IjoiY2piYXJyZSIsImEiOiJjam9haXV6bXAwOWk0M3BvenFva3Z1MHphIn0.d4MKkC61nQ9QS6h-49rWlw"}))
+                                         mymap)
+                                 (.addTo (get-in @app-state [:map :current-position-marker]) mymap)
+                                 (.watchPosition navigator.geolocation (fn [pos]
+                                                                         (.setView mymap #js [pos.coords.latitude, pos.coords.longitude] 16)
+                                                                         (.update (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude]))))))}
+  []
+  [:div#map {:style {:height "95vh"
+                     :width "100vw"}}])
+
+(rum/defc app []
+  [:div {}
+   (zone-indicator)
+   (mapc)])
+
+(rum/mount (app)
+           (. js/document (getElementById "app")))
+
 
