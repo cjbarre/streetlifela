@@ -38,7 +38,8 @@
                                                                          (println reply)
                                                                          (if (cb-success? reply)
                                                                            (do (swap! app-state assoc :color (get zone-colors (:zone reply)))
-                                                                               (rum/mount (zone-indicator) (. js/document (getElementById "app"))))
+                                                                               ;(rum/mount (zone-indicator) (. js/document (getElementById "app")))
+                                                                               )
                                                                            (println reply)))))))}
   []
   [:div {:style {:background-color (:color @app-state)
