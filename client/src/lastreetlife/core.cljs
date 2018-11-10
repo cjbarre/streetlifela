@@ -10,7 +10,7 @@
 (let [{:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/api/chsk"
        {:type :auto})]
-  (def chsk       chsk)
+  (def chsk       chsk) 
   (def ch-chsk    ch-recv)
   (def chsk-send! send-fn)
   (def chsk-state state))
@@ -21,9 +21,10 @@
                   :yellow "#FFFF00"
                   :green "#00FF00"})
 
-(defonce zone-color (atom "#FFFFFF"))
+(defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}
+                          :zone-indicator {:color "#FFFFFF"}}))
 
-(defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
+(declare app)
 
 (rum/defc zone-indicator < rum/reactive {:did-mount (fn [state]
                                                       (.watchPosition navigator.geolocation
@@ -38,10 +39,11 @@
                                                                                       (println "Request Answered")
                                                                                       (println reply)
                                                                                       (if (cb-success? reply)
-                                                                                        (reset! zone-color (get zone-colors (:zone reply)))
-                                                                                        (println reply)))))))}
+                                                                                        (swap! app-state assoc-in [:zone-indicator :color] (get zone-colors (:zone reply)))
+                                                                                        (println reply))))))
+                                                      state)}
   []
-  [:div {:style {:background-color (rum/react zone-color)
+  [:div {:style {:background-color (get-in (rum/react app-state) [:zone-indicator :color])
                  :width "100vw" 
                  :height "5vh"
                  :margin "0"
@@ -67,7 +69,8 @@
                                  (.addTo (get-in @app-state [:map :current-position-marker]) mymap)
                                  (.watchPosition navigator.geolocation (fn [pos]
                                                                          (.setView mymap #js [pos.coords.latitude, pos.coords.longitude] 16)
-                                                                         (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude])))))}
+                                                                         (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude]))))
+                               state)}
   []
   [:div#map {:style {:height "95vh"
                      :width "100vw"}}])
