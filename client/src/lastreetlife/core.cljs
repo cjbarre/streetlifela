@@ -25,9 +25,9 @@
 
 (defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
 
-(rum/defc zone-indicator < rum/reactive < {:did-catch (fn [error info]
-                                                                  (println error)
-                                                                  (println info))
+(rum/defc zone-indicator < rum/reactive < {:did-catch (fn [state error info]
+                                                        (println error)
+                                                        (println info))
                                            :did-mount (fn [state]
                                                         (.watchPosition navigator.geolocation
                                                                         (fn [pos]
