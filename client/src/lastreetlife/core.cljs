@@ -25,7 +25,10 @@
 
 (defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
 
-(rum/defc zone-indicator < rum/reactive < {:did-mount (fn [state]
+(rum/defc zone-indicator < rum/reactive < {:component-did-catch (fn [error info]
+                                                                  (println error)
+                                                                  (println info))
+                                           :did-mount (fn [state]
                                                         (.watchPosition navigator.geolocation
                                                                         (fn [pos]
                                                                           (println "Sending request")
@@ -55,19 +58,19 @@
 
 ;; define your app data so that it doesn't get over-written on reload 
 
-(rum/defc mapc < rum/reactive < {:did-mount (fn [state]
-                                              (let [mymap (.map js/L "map")]
-                                                (.addTo (.tileLayer js/L
-                                                                    "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}"
-                                                                    (clj->js
-                                                                     {:maxZoom 18
-                                                                      :id "mapbox.streets"
-                                                                      :accessToken "pk.eyJ1IjoiY2piYXJyZSIsImEiOiJjam9haXV6bXAwOWk0M3BvenFva3Z1MHphIn0.d4MKkC61nQ9QS6h-49rWlw"}))
-                                                        mymap)
-                                                (.addTo (get-in @app-state [:map :current-position-marker]) mymap)
-                                                (.watchPosition navigator.geolocation (fn [pos]
-                                                                                        (.setView mymap #js [pos.coords.latitude, pos.coords.longitude] 16)
-                                                                                        (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude])))))}
+(rum/defc mapc < {:did-mount (fn [state]
+                               (let [mymap (.map js/L "map")]
+                                 (.addTo (.tileLayer js/L
+                                                     "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}"
+                                                     (clj->js
+                                                      {:maxZoom 18
+                                                       :id "mapbox.streets"
+                                                       :accessToken "pk.eyJ1IjoiY2piYXJyZSIsImEiOiJjam9haXV6bXAwOWk0M3BvenFva3Z1MHphIn0.d4MKkC61nQ9QS6h-49rWlw"}))
+                                         mymap)
+                                 (.addTo (get-in @app-state [:map :current-position-marker]) mymap)
+                                 (.watchPosition navigator.geolocation (fn [pos]
+                                                                         (.setView mymap #js [pos.coords.latitude, pos.coords.longitude] 16)
+                                                                         (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude])))))}
   []
   [:div#map {:style {:height "95vh"
                      :width "100vw"}}])
