@@ -21,8 +21,9 @@
                   :yellow "#FFFF00"
                   :green "#00FF00"})
 
-(defonce app-state (atom {:color "#FFFFFF"
-                          :map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
+(defonce zone-color (atom "#FFFFFF"))
+
+(defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
 
 (rum/defc zone-indicator < rum/reactive < {:did-mount (fn [state]
                                                         (.watchPosition navigator.geolocation
@@ -37,10 +38,10 @@
                                                                                         (println "Request Answered")
                                                                                         (println reply)
                                                                                         (if (cb-success? reply)
-                                                                                          (do (swap! app-state assoc :color (get zone-colors (:zone reply))))
+                                                                                          (do (reset! zone-color (get zone-colors (:zone reply))))
                                                                                           (println reply)))))))}
   []
-  [:div {:style {:background-color (:color @app-state)
+  [:div {:style {:background-color (rum/react zone-color)
                  :width "100vw"
                  :height "5vh"
                  :margin "0"
