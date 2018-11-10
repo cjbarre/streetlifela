@@ -25,27 +25,24 @@
 
 (defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
 
-(rum/defc zone-indicator < rum/reactive < {:did-catch (fn [state error info]
-                                                        (println error)
-                                                        (println info))
-                                           :did-mount (fn [state]
-                                                        (.watchPosition navigator.geolocation
-                                                                        (fn [pos]
-                                                                          (println "Sending request")
-                                                                          (println (str pos.coords.latitude "," pos.coords.longitude))
-                                                                          (chsk-send! [:app/user-position-update
-                                                                                       {:latitude pos.coords.latitude
-                                                                                        :longitude pos.coords.longitude}]
-                                                                                      5000
-                                                                                      (fn [reply]
-                                                                                        (println "Request Answered")
-                                                                                        (println reply)
-                                                                                        (if (cb-success? reply)
-                                                                                          (do (reset! zone-color (get zone-colors (:zone reply))))
-                                                                                          (println reply)))))))}
+(rum/defc zone-indicator < rum/reactive {:did-mount (fn [state]
+                                                      (.watchPosition navigator.geolocation
+                                                                      (fn [pos]
+                                                                        (println "Sending request")
+                                                                        (println (str pos.coords.latitude "," pos.coords.longitude))
+                                                                        (chsk-send! [:app/user-position-update
+                                                                                     {:latitude pos.coords.latitude
+                                                                                      :longitude pos.coords.longitude}]
+                                                                                    5000
+                                                                                    (fn [reply]
+                                                                                      (println "Request Answered")
+                                                                                      (println reply)
+                                                                                      (if (cb-success? reply)
+                                                                                        (reset! zone-color (get zone-colors (:zone reply)))
+                                                                                        (reset! zone-color "#00FF00")))))))}
   []
   [:div {:style {:background-color (rum/react zone-color)
-                 :width "100vw"
+                 :width "100vw" 
                  :height "5vh"
                  :margin "0"
                  :padding "0"}}])
@@ -82,5 +79,4 @@
 
 (rum/mount (app)
            (. js/document (getElementById "app")))
-
 
