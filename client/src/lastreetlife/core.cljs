@@ -39,7 +39,7 @@
                                                                                       (println reply)
                                                                                       (if (cb-success? reply)
                                                                                         (reset! zone-color (get zone-colors (:zone reply)))
-                                                                                        (reset! zone-color "#00FF00")))))))}
+                                                                                        (println reply)))))))}
   []
   [:div {:style {:background-color (rum/react zone-color)
                  :width "100vw" 
