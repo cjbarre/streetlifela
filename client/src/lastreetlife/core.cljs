@@ -8,7 +8,7 @@
 
 
 (let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket! "/api/chsk"
+      (sente/make-channel-socket! "/api/chsk" {:host "localhost:80"}
        {:type :auto})]
   (def chsk       chsk) 
   (def ch-chsk    ch-recv)
@@ -19,7 +19,8 @@
 
 (def zone-colors {:red "#FF0000"
                   :yellow "#FFFF00"
-                  :green "#00FF00"})
+                  :green "#00FF00"
+                  :white "#FFFFFF"})
 
 (defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}
                           :zone-indicator {:color "#FFFFFF"}}))
@@ -31,7 +32,7 @@
                                                                       (fn [pos]
                                                                         (println "Sending request")
                                                                         (println (str pos.coords.latitude "," pos.coords.longitude))
-                                                                        (chsk-send! [:app/user-position-update
+                                                                        (chsk-send! [:app/UserPositionChanged
                                                                                      {:latitude pos.coords.latitude
                                                                                       :longitude pos.coords.longitude}]
                                                                                     5000
@@ -39,7 +40,10 @@
                                                                                       (println "Request Answered")
                                                                                       (println reply)
                                                                                       (if (cb-success? reply)
-                                                                                        (swap! app-state assoc-in [:zone-indicator :color] (get zone-colors (:zone reply)))
+                                                                                        (do
+                                                                                          (swap! app-state assoc-in [:zone-indicator :color] (get zone-colors (:color reply)))
+                                                                                          (if (:exception reply)
+                                                                                            (println (:exception reply))))
                                                                                         (println reply))))))
                                                       state)}
   []
