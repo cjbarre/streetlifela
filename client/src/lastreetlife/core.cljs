@@ -64,10 +64,10 @@
 (rum/defc mapc < {:did-mount (fn [state]
                                (let [mymap (.map js/L "map")]
                                  (.addTo (.tileLayer js/L
-                                                     "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}"
+                                                     "https://api.mapbox.com/styles/v1/cjbarre/cjonhdun32u8k2st5vzr60gah/tiles/{z}/{x}/{y}?access_token={accessToken}"
                                                      (clj->js
                                                       {:maxZoom 18
-                                                       :id "mapbox.streets"
+                                                       :id "cjbarre.safe-parking-streets"
                                                        :accessToken "pk.eyJ1IjoiY2piYXJyZSIsImEiOiJjam9haXV6bXAwOWk0M3BvenFva3Z1MHphIn0.d4MKkC61nQ9QS6h-49rWlw"}))
                                          mymap)
                                  (.addTo (get-in @app-state [:map :current-position-marker]) mymap)
