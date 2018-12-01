@@ -40,7 +40,7 @@
                                          mymap)
                                  (.addTo (get-in @app-state [:map :current-position-marker]) mymap)
                                  (.watchPosition navigator.geolocation (fn [pos]
-                                                                         (.setView mymap #js [pos.coords.latitude, pos.coords.longitude] 16)
+                                                                         (.setView mymap #js [pos.coords.latitude, pos.coords.longitude] 18)
                                                                          (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude]))))
                                state)}
   []
