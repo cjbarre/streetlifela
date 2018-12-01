@@ -6,8 +6,6 @@
             [cljsjs.leaflet]
             [cljsjs.leaflet-locatecontrol]))
 
-
-
 (let [{:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/api/chsk"
        {:type :auto})]
@@ -18,9 +16,7 @@
 
 (enable-console-print!)
 
-(defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
-
-(declare app)
+(defonce app-state (atom {}))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
