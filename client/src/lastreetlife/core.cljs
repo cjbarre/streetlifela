@@ -28,7 +28,7 @@
 
 (rum/defc mapc < {:did-mount (fn [state]
                                (let [mymap (.map js/L "map")
-                                     locate-control (js/L.control.locate)]
+                                     locate-control (js/L.control.locate (clj->js {:setView "untilPan"}))]
                                  (.addTo (.tileLayer js/L
                                                      "https://api.mapbox.com/styles/v1/cjbarre/cjonhdun32u8k2st5vzr60gah/tiles/{z}/{x}/{y}?access_token={accessToken}"
                                                      (clj->js
