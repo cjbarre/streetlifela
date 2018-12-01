@@ -34,7 +34,7 @@
                                  (.addTo (.tileLayer js/L
                                                      "https://api.mapbox.com/styles/v1/cjbarre/cjonhdun32u8k2st5vzr60gah/tiles/{z}/{x}/{y}?access_token={accessToken}"
                                                      (clj->js
-                                                      {:maxZoom 18
+                                                      {:maxZoom 20
                                                        :id "cjbarre.safe-parking-streets"
                                                        :accessToken "pk.eyJ1IjoiY2piYXJyZSIsImEiOiJjam9haXV6bXAwOWk0M3BvenFva3Z1MHphIn0.d4MKkC61nQ9QS6h-49rWlw"}))
                                          mymap)
