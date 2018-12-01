@@ -13,7 +13,8 @@
                  [org.clojure/core.async  "0.4.474"]
                  [rum "0.11.2"]
                  [com.taoensso/sente "1.13.1"]
-                 [cljsjs/leaflet "1.3.4-0"]]
+                 [cljsjs/leaflet "1.3.4-0"]
+                 [cljsjs/leaflet-locatecontrol "0.43.0-1"]]
 
   :plugins [[lein-figwheel "0.5.16"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
