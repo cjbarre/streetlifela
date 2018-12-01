@@ -8,7 +8,7 @@
 
 
 (let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket! "/api/chsk"
+      (sente/make-channel-socket! "/api/chsk" {:host "localhost:80"}
        {:type :auto})]
   (def chsk       chsk) 
   (def ch-chsk    ch-recv)
@@ -17,41 +17,9 @@
 
 (enable-console-print!)
 
-(def zone-colors {:red "#FF0000"
-                  :yellow "#FFFF00"
-                  :green "#00FF00"
-                  :white "#FFFFFF"})
-
-(defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}
-                          :zone-indicator {:color "#FFFFFF"}}))
+(defonce app-state (atom {:map {:current-position-marker (.circleMarker js/L #js [0,0])}}))
 
 (declare app)
-
-(rum/defc zone-indicator < rum/reactive {:did-mount (fn [state]
-                                                      (.watchPosition navigator.geolocation
-                                                                      (fn [pos]
-                                                                        (println "Sending request")
-                                                                        (println (str pos.coords.latitude "," pos.coords.longitude))
-                                                                        (chsk-send! [:app/UserPositionChanged
-                                                                                     {:latitude pos.coords.latitude
-                                                                                      :longitude pos.coords.longitude}]
-                                                                                    5000
-                                                                                    (fn [reply]
-                                                                                      (println "Request Answered")
-                                                                                      (println reply)
-                                                                                      (if (cb-success? reply)
-                                                                                        (do
-                                                                                          (swap! app-state assoc-in [:zone-indicator :color] (get zone-colors (:color reply)))
-                                                                                          (if (:exception reply)
-                                                                                            (println (:exception reply))))
-                                                                                        (println reply))))))
-                                                      state)}
-  []
-  [:div {:style {:background-color (get-in (rum/react app-state) [:zone-indicator :color])
-                 :width "100vw" 
-                 :height "5vh"
-                 :margin "0"
-                 :padding "0"}}])
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
@@ -76,12 +44,11 @@
                                                                          (.setLatLng (get-in @app-state [:map :current-position-marker]) #js [pos.coords.latitude, pos.coords.longitude]))))
                                state)}
   []
-  [:div#map {:style {:height "95vh"
+  [:div#map {:style {:height "100vh"
                      :width "100vw"}}])
 
 (rum/defc app []
   [:div {}
-   (zone-indicator)
    (mapc)])
 
 (rum/mount (app)
