@@ -9,7 +9,7 @@
 
 
 (let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket! "/api/chsk" {:host "localhost:80"}
+      (sente/make-channel-socket! "/api/chsk"
        {:type :auto})]
   (def chsk       chsk) 
   (def ch-chsk    ch-recv)
